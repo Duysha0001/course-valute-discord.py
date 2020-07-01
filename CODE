@@ -1,0 +1,40 @@
+"""
+Автор: Aleksey#4360 (имя#тэг в Discord)
+"""
+
+@commands.command()
+async def курс(self, ctx): # сами создавайте alias, я просто хочу поделиться кодом 
+	kurs = "http://resources.finance.ua/ru/public/currency-cash.json" # json документ с данными курса валют
+	headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:76.0) Gecko/20100101 Firefox/76.0'} # headers, на всякий случай
+	full_page = requests.get(kurs, headers=headers) # получаем данные
+	request = full_page.json() # превращаем в словарь
+	nomer = 0 # для перебора, так как этот документ обновляясь каждые 10 минут смещает под другой индекс нужные нам данные
+	nuzhniy_id = "7oiylpmiow8iy1smau3" # опять же, для перебора
+	for nuzhniy_id in request["organizations"][int(nomer)]["id"]: # начинаем перебор
+		if request["organizations"][int(nomer)]["id"] == "7oiylpmiow8iy1smau3": # если нашли нужный id, то начинаем сам парсинг
+			emb = discord.Embed(colour = discord.Color.dark_teal()) # создаём эмбед
+			emb.set_author(name = "Курс доллара к валютам", icon_url = "https://t4.ftcdn.net/jpg/01/34/67/51/240_F_134675192_TC1KncAkC6EAEBDxXj5Uy1900F1ZbJ6v.jpg")
+			"""Далее мы парсим, вставляя всё это в эмбед, мы тут используем математику, поскольку данный json документ вмещает в себе данные о курсе по отношению к гривне"""
+			emb.add_field(name = 'Доллар к рос.рублю', value = f'1$ = {round(float(1 / float(request["organizations"][int(nomer)]["currencies"]["RUB"]["ask"]) * float(request["organizations"][int(nomer)]["currencies"]["USD"]["ask"])), 2)}₽')
+			emb.add_field(name = "Доллар к гривне", value = f'1$ = {round(float(request["organizations"][int(nomer)]["currencies"]["USD"]["ask"]), 2)}₴')
+			emb.add_field(name = "‎‎‎‎", value = "‎‎‎‎")
+			emb.add_field(name = "Доллар к тенге", value = f'1$ = {round(float(1 / float(request["organizations"][int(nomer)]["currencies"]["KZT"]["ask"]) * float(request["organizations"][int(nomer)]["currencies"]["USD"]["ask"])), 2)}₸')
+			emb.add_field(name = "Доллар к бел.рублю", value = f'1$ = {round(float(1 / float(request["organizations"][int(nomer)]["currencies"]["BYN"]["ask"]) * float(request["organizations"][int(nomer)]["currencies"]["USD"]["ask"])), 2)}Ў')
+			emb.add_field(name = "‎‎‎‎", value = "‎‎‎‎")
+			emb.set_footer(text="Данные курса обновляются каждые 10 минут")
+			await ctx.send(embed = emb) # отправляем данные курса за доллар
+
+			"""Повторение процедуры, только уже с евро"""
+			em = discord.Embed(colour = discord.Color.dark_teal()) 
+			em.set_author(name = "Курс евро к валютам", icon_url = "https://media.discordapp.net/attachments/640123959135698954/715889024610467920/euro1.png?width=407&height=407")
+			em.add_field(name = 'Евро к рос.рублю', value = f'1€ = {round(float(1 / float(request["organizations"][int(nomer)]["currencies"]["RUB"]["ask"]) * float(request["organizations"][int(nomer)]["currencies"]["EUR"]["ask"])), 2)}₽')
+			em.add_field(name = "Евро к гривне", value = f'1€ = {round(float(request["organizations"][int(nomer)]["currencies"]["EUR"]["ask"]), 2)}₴')
+			em.add_field(name = "‎‎‎‎", value = "‎‎‎‎")
+			em.add_field(name = "Евро к тенге", value = f'1€ = {round(float(1 / float(request["organizations"][int(nomer)]["currencies"]["KZT"]["ask"]) * float(request["organizations"][int(nomer)]["currencies"]["EUR"]["ask"])), 2)}₸')
+			em.add_field(name = "Евро к бел.рублю", value = f'1€ = {round(float(1 / float(request["organizations"][int(nomer)]["currencies"]["BYN"]["ask"]) * float(request["organizations"][int(nomer)]["currencies"]["EUR"]["ask"])), 2)}Ў')
+			em.add_field(name = "‎‎‎‎", value = "‎‎‎‎")
+			em.set_footer(text="Данные курса обновляются каждые 10 минут")
+			await ctx.send(embed = em)
+			return # чтобы бот не спамил
+		elif request["organizations"][int(nomer)]["id"] != "7oiylpmiow8iy1smau3": # на случай перебора, если мы не нашли сразу нужные данные
+			nomer += 1
