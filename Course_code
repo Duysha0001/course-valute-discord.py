@@ -1,0 +1,41 @@
+"""
+Aleksey#4360 - Discord профиль автора кода.
+"""
+
+@commands.command(name="курс", 
+					description="Курс валют", 
+					usage="курс",
+					aliases=["course", "валюты", "currencies"]
+				) # декоратор, говорящий боту, что создана команда
+	async def parse_course_of_money(self, ctx): # Функция команды
+		await ctx.message.delete() # удаление сообщения вызова команды
+		kurs = "https://www.cbr-xml-daily.ru/daily_json.js" # откуда будем брать курс
+		full_page = requests.get(kurs) # отправляем запрос
+		request = full_page.json() # получаем в формате JSON
+		uah_usd_course = request["Valute"]["UAH"]["Nominal"] / request["Valute"]["UAH"]["Value"] * request["Valute"]["USD"]["Value"] # курс укр.гривны - доллара США
+		kzt_usd_course = request["Valute"]["KZT"]["Nominal"] / request["Valute"]["KZT"]["Value"] * request["Valute"]["USD"]["Value"] # курс казах. тенге - доллара США
+		byn_usd_course = request["Valute"]["BYN"]["Nominal"] / request["Valute"]["UAH"]["Value"] * request["Valute"]["USD"]["Value"] # курс бел. рубля - доллара США
+		uah_eur_course = request["Valute"]["UAH"]["Nominal"] / request["Valute"]["UAH"]["Value"] * request["Valute"]["EUR"]["Value"] # курс укр.гривны - евро
+		kzt_eur_course = request["Valute"]["KZT"]["Nominal"] / request["Valute"]["KZT"]["Value"] * request["Valute"]["EUR"]["Value"] # курс казах. тенге - евро
+		byn_eur_course = request["Valute"]["BYN"]["Nominal"] / request["Valute"]["UAH"]["Value"] * request["Valute"]["EUR"]["Value"] # курс бел. рубля - евро
+		emb = discord.Embed(colour = discord.Color.dark_teal()) # создаём обьект эмбеда с цветом по умолчанию
+		emb.set_author(name = "Курс доллара к валютам", icon_url = "https://t4.ftcdn.net/jpg/01/34/67/51/240_F_134675192_TC1KncAkC6EAEBDxXj5Uy1900F1ZbJ6v.jpg")
+		emb.add_field(name = 'Доллар к рос.рублю', value = f'1$ = {round(request["Valute"]["USD"]["Value"], 2)}₽') # курс рос. рубля - доллара США
+		emb.add_field(name = "Доллар к гривне", value = f'1$ = {round(uah_usd_course, 2)}₴')
+		emb.add_field(name = "‎‎‎‎", value = "‎‎‎‎")
+		emb.add_field(name = "Доллар к тенге", value = f'1$ = {round(kzt_usd_course, 2)}₸')
+		emb.add_field(name = "Доллар к бел.рублю", value = f'1$ = {round(byn_usd_course, 2)}Ў')
+		emb.add_field(name = "‎‎‎‎", value = "‎‎‎‎")
+		emb.set_footer(text="Данные курса обновляются каждые 10 минут")
+		await ctx.send(embed = emb) # отправляем курс доллара США
+		em = discord.Embed(colour = discord.Color.dark_teal()) # создаём обьект эмбеда с цветом по умолчанию
+		em.set_author(name = "Курс евро к валютам", icon_url = "https://media.discordapp.net/attachments/640123959135698954/715889024610467920/euro1.png?width=407&height=407")
+		em.add_field(name = 'Евро к рос.рублю', value = f'1€ = {round(request["Valute"]["EUR"]["Value"], 2)}₽') # курс рос. рубля - евро
+		em.add_field(name = "Евро к гривне", value = f'1€ = {round(uah_eur_course, 2)}₴')
+		em.add_field(name = "‎‎‎‎", value = "‎‎‎‎")
+		em.add_field(name = "Евро к тенге", value = f'1€ = {round(kzt_eur_course, 2)}₸')
+		em.add_field(name = "Евро к бел.рублю", value = f'1€ = {round(byn_eur_course, 2)}Ў')
+		em.add_field(name = "\0", value = "\0") # \0 в Python это пустой символ, если я ошибаюсь - поправьте
+		em.set_footer(text="Данные курса обновляются каждые 10 минут")
+		await ctx.send(embed = em) # отправляем курс евро
+		return
